@@ -1,0 +1,25 @@
+{
+  "name": "zoom-clone",
+  "version": "1.0.0",
+  "description": "Zoom clone - recreating the popular Zoom browser app",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "nodejs"
+  ],
+  "author": "Sima Mircea",
+  "license": "MIT",
+  "dependencies": {
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "peer": "^0.5.3",
+    "socket.io": "^2.3.0",
+    "uuid": "^8.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
