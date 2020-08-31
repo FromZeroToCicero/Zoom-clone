@@ -31,6 +31,9 @@ io.on("connection", (socket) => {
     socket.on("message", (message) => {
       io.to(roomId).emit("create-message", message);
     });
+    socket.on("disconnect", () => {
+      socket.to(roomId).broadcast.emit("user-disconnected", userId);
+    })
   });
 });
 

@@ -1,15 +1,16 @@
 const socket = io("/");
-const myVideo = document.createElement("video");
 const videoGrid = document.getElementById("video-grid");
+const myVideo = document.createElement("video");
 myVideo.muted = true;
 
-const peer = new Peer(undefined, {
+const myPeer = new Peer(undefined, {
   path: "/peerjs",
   host: "/",
   port: "443",
 });
 
 let myVideoStream;
+const connectedPeers = {};
 
 navigator.mediaDevices
   .getUserMedia({
@@ -20,7 +21,7 @@ navigator.mediaDevices
     myVideoStream = stream;
     addVideoStream(myVideo, stream);
 
-    peer.on("call", (call) => {
+    myPeer.on("call", (call) => {
       call.answer(stream);
       const video = document.createElement("video");
       call.on("stream", (userVideoStream) => {
@@ -47,6 +48,16 @@ navigator.mediaDevices
     });
   });
 
+socket.on('user-disconnected', userId => {
+  if (connectedPeers[userId]) {
+    connectedPeers[userId].close();
+  }
+});
+
+myPeer.on("open", (id) => {
+  socket.emit("join-room", ROOM_ID, id);
+});
+
 const addVideoStream = (video, stream) => {
   video.srcObject = stream;
   video.addEventListener("loadedmetadata", () => {
@@ -56,11 +67,17 @@ const addVideoStream = (video, stream) => {
 };
 
 const connectToNewUser = (userId, stream) => {
-  const call = peer.call(userId, stream);
+  const call = myPeer.call(userId, stream);
   const video = document.createElement("video");
   call.on("stream", (userVideoStream) => {
     addVideoStream(video, userVideoStream);
   });
+
+  call.on('close', () => {
+    video.remove()
+  });
+
+  connectedPeers[userId] = call;
 };
 
 const scrollToBottom = () => {
@@ -121,7 +138,3 @@ const setStopVideo = () => {
       `;
   document.querySelector(".main__video_button").innerHTML = html;
 };
-
-peer.on("open", (id) => {
-  socket.emit("join-room", ROOM_ID, id);
-});
